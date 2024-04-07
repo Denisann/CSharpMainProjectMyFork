@@ -45,7 +45,7 @@
     <Analyzer Include="E:\Tools\UnityHub\Installs\2022.3.12f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\Editor\Tests\ArchToTileProjectileTests.cs" />
+     <Compile Include="Assets\Scripts\Editor\Tests\Dz2Test.cs" />
      <None Include="Assets\Scripts\Editor\Tests\Tests.asmdef" />
      <Folder Include="Assets\Scripts\Editor\Tests" />
      <Reference Include="UnityEngine">
