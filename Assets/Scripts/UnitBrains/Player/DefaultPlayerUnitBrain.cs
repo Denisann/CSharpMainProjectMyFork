@@ -13,8 +13,8 @@ namespace UnitBrains.Player
 
         public override Vector2Int GetNextStep()
         {
-            var recommendedTarget = UnitController.GetInstance().RecomendTarget;
-            var recommendedPoint = UnitController.GetInstance().RecomendPoint;
+            var recommendedTarget = Controller.RecommendedTarget;
+            var recommendedPoint = Controller.RecommendedPoint;
 
             _activePath = new A_StartUnitPath(runtimeModel, unit.Pos, recommendedPoint);
 
@@ -33,8 +33,7 @@ namespace UnitBrains.Player
         protected override List<Vector2Int> SelectTargets()
         {
             var result = GetReachableTargets();
-            var recommendedTarget = UnitController.GetInstance().RecomendTarget;
-
+            var recommendedTarget = Controller.RecommendedTarget;
             if (result.Contains(recommendedTarget))
                 return new List<Vector2Int>() { recommendedTarget };
 

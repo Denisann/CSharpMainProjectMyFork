@@ -6,34 +6,26 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Utilities;
+using UnitBrains;
 
-public class UnitController : IDisposable
+public class PlayerUnitController : IReadOnlyUnitController, IDisposable
 {
+    public Vector2Int RecommendedTarget { get; private set; }
+    public Vector2Int RecommendedPoint { get; private set; }
     private IReadOnlyRuntimeModel _runtimeModel;
     private TimeUtil _timeUtil;
-    private static UnitController _controller;
     private bool _onPlayerHalf;
     private float _attackRange;
     private UnitSorter _unitSorter;
-    public Vector2Int RecomendTarget {  get; private set; }
-    public Vector2Int RecomendPoint {  get; private set; }
 
-    private UnitController() 
+
+    public PlayerUnitController() 
     { 
         _runtimeModel = ServiceLocator.Get<IReadOnlyRuntimeModel>();
         _timeUtil = ServiceLocator.Get<TimeUtil>();
-        _attackRange = _runtimeModel.RoPlayerUnits.First().Config.AttackRange;
         _unitSorter = new UnitSorter();
 
         _timeUtil.AddFixedUpdateAction(UpdateRecomendations);
-    }
-
-    public static UnitController GetInstance()
-    {
-        if(_controller == null)
-            _controller = new UnitController();
-
-        return _controller;
     }
 
     private void UpdateRecomendations(float deltaTime)
@@ -49,8 +41,8 @@ public class UnitController : IDisposable
         }
 
         var botBasePosition = _runtimeModel.RoMap.Bases[RuntimeModel.BotPlayerId];
-        RecomendTarget = botBasePosition;
-        RecomendPoint = botBasePosition;
+        RecommendedTarget = botBasePosition;
+        RecommendedPoint = botBasePosition;
     }
 
     private void UpdateRecommendedTarget(List<IReadOnlyUnit> botUnits)
@@ -64,23 +56,34 @@ public class UnitController : IDisposable
             _unitSorter.SortByHealth(botUnits);
         }
 
-        RecomendTarget = botUnits.First().Pos;
+        RecommendedTarget = botUnits.First().Pos;
     }
 
 
-    public void UpdateRecommendedPoint(List<IReadOnlyUnit> botUnits)
+    private void UpdateRecommendedPoint(List<IReadOnlyUnit> botUnits)
     {
         if (_onPlayerHalf)
         {
-            RecomendPoint = _runtimeModel.RoMap.Bases[RuntimeModel.PlayerId] + Vector2Int.up;
+            RecommendedPoint = _runtimeModel.RoMap.Bases[RuntimeModel.PlayerId] + Vector2Int.up;
         }
         else
         {
             _unitSorter.SortByDistanceToBase(botUnits, EBaseType.PlayerBase);
+            _attackRange = GetUnitAttackRange();
             int x = botUnits.First().Pos.x;
             int y = botUnits.First().Pos.y - Mathf.FloorToInt(_attackRange);
-            RecomendPoint = new Vector2Int(x, y);
+            RecommendedPoint = new Vector2Int(x, y);
         }
+    }
+
+    private float GetUnitAttackRange()
+    {
+        var playerUnits = _runtimeModel.RoPlayerUnits.ToList();
+
+        if (playerUnits.Any())
+            return playerUnits.First().Config.AttackRange;
+
+        return 1f;
     }
 
 
